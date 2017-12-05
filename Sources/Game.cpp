@@ -1,14 +1,14 @@
 #include "Game.hpp"
 
 
-// TODO: 砲台の位置を画面左に、ターゲットの位置を画面右に移動させる。(A)
-// TODO: 雲の位置を左から右に動かす。見えなくなったら左端に戻す。(B)
-// TODO: 砲台を青い壁に沿って上下に動かす。(C)
-// TODO: 弾のスピードを速くし、弾が画面右端を通り越したら再度発射可能にする。(D)
+// TODO: 砲台の位置を画面左に、ターゲットの位置を画面右に移動させる。(A)＠寺田
+// TODO: 雲の位置を左から右に動かす。見えなくなったら左端に戻す。(B)＠寺田
+// TODO: 砲台を青い壁に沿って上下に動かす。(C)＠寺田
+// TODO: 弾のスピードを速くし、弾が画面右端を通り越したら再度発射可能にする。(D)＠濱崎
 // TODO: スコアのサイズを大きくする。(E)
 // TODO: スコアを100点ずつ加算するようにし、5桁の表示に変える。(F)
-// TODO: PlayBGM()関数を使って、BGMを再生する。(G)
-// TODO: PlaySE()関数を使って、弾の発射時とターゲットに当たった時にSEを再生する。(H)
+// TODO: PlayBGM()関数を使って、BGMを再生する。(G)＠濱崎
+// TODO: PlaySE()関数を使って、弾の発射時とターゲットに当たった時にSEを再生する。(H)＠濱崎
 
 
 Vector2 cloudPos;       //!< 雲の位置
@@ -16,16 +16,19 @@ Vector2 cannonPos;      //!< 砲台の位置
 Vector2 bulletPos;      //!< 弾の位置
 Rect    targetRect;     //!< ターゲットの矩形
 int     score;          //!< スコア
+bool botom;
 
 
 // ゲーム開始時に呼ばれる関数です。
 void Start()
 {
     cloudPos = Vector2(-320, 100);
-    cannonPos = Vector2(-80, -150);
-    targetRect = Rect(80, -140, 40, 40);
+    cannonPos = Vector2(-320, -150);
+    targetRect = Rect(260, -140, 40, 40);
     bulletPos.x = -999;
     score = 0;
+    botom = true;
+    PlaySound("bgm_maoudamashii_8bit07.mp3");
 }
 
 // 1/60秒ごとに呼ばれる関数です。モデルの更新と画面の描画を行います。
@@ -33,16 +36,18 @@ void Update()
 {
     // 弾の発射
     if (bulletPos.x <= -999 && Input::GetKeyDown(KeyMask::Space)) {
+        PlaySound("se_maoudamashii_system20.mp3");
         bulletPos = cannonPos + Vector2(50, 10);
     }
 
     // 弾の移動
     if (bulletPos.x > -999) {
-        bulletPos.x += 10 * Time::deltaTime;
+        bulletPos.x += 500 * Time::deltaTime;
 
         // ターゲットと弾の当たり判定
         Rect bulletRect(bulletPos, Vector2(32, 20));
         if (targetRect.Overlaps(bulletRect)) {
+            PlaySound("se_maoudamashii_explosion06.mp3");
             score += 1;         // スコアの加算
             bulletPos.x = -999; // 弾を発射可能な状態に戻す
         }
@@ -54,15 +59,34 @@ void Update()
 
     // 雲の描画
     DrawImage("cloud1.png", cloudPos);
+    cloudPos.x += 3;
+    if (cloudPos.x >= 540) {
+        cloudPos.x = -530;
+    }
 
     // 弾の描画
     if (bulletPos.x > -999) {
         DrawImage("bullet.png", bulletPos);
     }
+    if (bulletPos.x > 320) {
+        bulletPos.x = -999;
+    }
 
     // 砲台の描画
     FillRect(Rect(cannonPos.x-10, -140, 20, 100), Color::blue);
     DrawImage("cannon.png", cannonPos);
+    if (botom == true) {
+        cannonPos.y += 1;
+        if (cannonPos.y > -70) {
+            botom = false;
+        }
+    }
+    if (botom == false) {
+        cannonPos.y -= 1;
+        if (cannonPos.y < -145) {
+            botom = true;
+        }
+    }
 
     // ターゲットの描画
     FillRect(targetRect, Color::red);
