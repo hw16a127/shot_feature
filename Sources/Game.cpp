@@ -17,6 +17,8 @@ Vector2 bulletPos;      //!< 弾の位置
 Rect    targetRect;     //!< ターゲットの矩形
 int     score;          //!< スコア
 bool botom;
+int     scorebass;
+int     use;
 
 
 // ゲーム開始時に呼ばれる関数です。
@@ -28,12 +30,23 @@ void Start()
     bulletPos.x = -999;
     score = 0;
     botom = true;
+    scorebass = 0;
+    use =0;
     PlaySound("bgm_maoudamashii_8bit07.mp3");
 }
 
 // 1/60秒ごとに呼ばれる関数です。モデルの更新と画面の描画を行います。
 void Update()
 {
+    //スコア加算
+    if (scorebass != 0) {
+        score += 10;
+        use += 1;
+        if (use == 10) {
+            scorebass -= 1;
+            use -=10;
+        }
+    }
     // 弾の発射
     if (bulletPos.x <= -999 && Input::GetKeyDown(KeyMask::Space)) {
         PlaySound("se_maoudamashii_system20.mp3");
@@ -48,7 +61,7 @@ void Update()
         Rect bulletRect(bulletPos, Vector2(32, 20));
         if (targetRect.Overlaps(bulletRect)) {
             PlaySound("se_maoudamashii_explosion06.mp3");
-            score += 1;         // スコアの加算
+            scorebass += 1;        // スコアの加算
             bulletPos.x = -999; // 弾を発射可能な状態に戻す
         }
     }
@@ -92,8 +105,7 @@ void Update()
     FillRect(targetRect, Color::red);
 
     // スコアの描画
-    SetFont("nicoca_v1.ttf", 20.0f);
-    DrawText(FormatString("%02d", score), Vector2(-319, 199), Color::black);
-    DrawText(FormatString("%02d", score), Vector2(-320, 200), Color::white);
+    SetFont("nicoca_v1.ttf", 45.0f);
+    DrawText(FormatString("%05d", score), Vector2(-319, 199), Color::black);
+    DrawText(FormatString("%05d", score), Vector2(-320, 200), Color::white);
 }
-
